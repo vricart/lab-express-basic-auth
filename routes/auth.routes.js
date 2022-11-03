@@ -23,6 +23,7 @@ router.post('/signup', async (req, res, next) => {
         res.render('auth/signup', {
             errorMessage: 'All the fields should be filled'
         })
+        return;
     }
 
     try {
@@ -39,8 +40,8 @@ router.post('/signup', async (req, res, next) => {
 
 })
 
-router.get('/userProfile', (req, res) => {
-    res.render('users/user-profile')
+router.get('/userProfile', (req, res, next) => {
+    res.render('users/user-profile', req.session.currentUser)
 })
 
 
@@ -49,7 +50,9 @@ router.get('/login', (req, res) => {
     res.render('auth/login')
 })
 
-router.post('/login', async (req, res) => {
+router.post('/login', async (req, res, next) => {
+    console.log(req.session)
+
     const {username, password} = req.body;
 
     if(!username || !password) {
@@ -64,9 +67,13 @@ router.post('/login', async (req, res) => {
 
         if(!userDB) {
             res.render('auth/login', {errorMessage: 'This username is not registered, Try again'})
+
         } else if (bcrypt.compareSync(password, userDB.password)) {
+            req.session.currentUser = userDB
+
             console.log(userDB)
             res.render('users/user-profile', userDB)
+
         } else {
             res.render('auth/login', {errorMessage: 'Incorrect Password, Try Again'})
         }
@@ -78,6 +85,15 @@ router.post('/login', async (req, res) => {
 
 
 
+router.post('/logout', (req, res) => {
+    req.session.destroy(error => {
+        if(error) {
+            console.log(error)
+        } else {
+            res.redirect('/')
+        }
+    })
+})
 
 
 module.exports = router;
