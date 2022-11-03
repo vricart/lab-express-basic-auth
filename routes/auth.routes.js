@@ -7,9 +7,11 @@ const saltRounds = 10;
 const User = require('../models/User.model');
 const { default: mongoose } = require('mongoose');
 
+const {isLoggedIn, isLoggedOut} = require('../middleware/route-guard')
 
 
-router.get('/signup', (req, res) => { 
+
+router.get('/signup', isLoggedOut, (req, res) => { 
     res.render('auth/signup')
 })
 
@@ -40,13 +42,13 @@ router.post('/signup', async (req, res, next) => {
 
 })
 
-router.get('/userProfile', (req, res, next) => {
+router.get('/userProfile', isLoggedIn, (req, res, next) => {
     res.render('users/user-profile', req.session.currentUser)
 })
 
 
 
-router.get('/login', (req, res) => {
+router.get('/login', isLoggedOut, (req, res) => {
     res.render('auth/login')
 })
 
